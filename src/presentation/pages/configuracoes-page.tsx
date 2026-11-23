@@ -1,3 +1,4 @@
+import { AtalhosOrganizacao } from '../features/rotina/atalhos-organizacao.js';
 import { useCallback, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -415,7 +416,7 @@ export function ConfiguracoesPage() {
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-6">
       <div>
-        <h1 className="text-xl font-semibold text-neutral-900">Configurações do consultório</h1><p className="demo-nota">Esta é uma demonstração. Você pode explorar os tutoriais, o catálogo e os horários. Backup, notificações do aparelho e integrações externas não são ativados aqui. Para entender o atendimento, use Simular atendimento.</p>
+        <h1 className="text-xl font-semibold text-neutral-900">Configurações do consultório</h1><AtalhosOrganizacao /><p className="demo-nota">Esta é uma demonstração. Você pode explorar os tutoriais, o catálogo e os horários. Backup, notificações do aparelho e integrações externas não são ativados aqui. Para entender o atendimento, use Simular atendimento.</p>
         <p className="text-sm text-neutral-600">
           Veja onde cada tipo de dado fica guardado, exporte uma cópia de segurança (backup), ou restaure uma cópia
           salva antes.

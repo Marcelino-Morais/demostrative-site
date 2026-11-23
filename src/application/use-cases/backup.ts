@@ -93,7 +93,7 @@ import type {
  * Versão 10 (aniversário/cortesia): adicionou `campanhasComemorativas`
  * e `mensagensCortesia`. OPCIONAIS como as anteriores.
  */
-export const VERSAO_FORMATO_BACKUP = 11;
+export const VERSAO_FORMATO_BACKUP = 12;
 
 /** Etiqueta de máquina que identifica um arquivo como backup DESTE sistema. */
 export const APP_ID_BACKUP = 'projfernanda';
@@ -118,6 +118,7 @@ export interface ResumoDoBackup {
 }
 
 export interface DadosBackup {
+  operacaoClinica?: {id:string;[chave:string]:unknown}[];
   despesas?: LancamentoFinanceiro[];
   parcelas?: LancamentoFinanceiro[];
   versao: number;
@@ -245,6 +246,7 @@ export function analisarBackup(valor: unknown): ResultadoAnaliseBackup {
   // `bloqueiosAgenda` são opcionais: ausentes viram lista vazia (arquivo de
   // uma versão anterior à coleção); presentes, precisam ser array.
   for (const chaveOpcional of [
+    'operacaoClinica',
     'despesas',
     'parcelas',
     'consultas',
@@ -285,6 +287,7 @@ export function analisarBackup(valor: unknown): ResultadoAnaliseBackup {
   }
 
   const listas = {
+    operacaoClinica: (obj.operacaoClinica as DadosBackup['operacaoClinica']) ?? [],
     despesas: (obj.despesas as LancamentoFinanceiro[] | undefined) ?? [],
     parcelas: (obj.parcelas as LancamentoFinanceiro[] | undefined) ?? [],
     pacientes: obj.pacientes as PacienteProps[],
@@ -436,7 +439,7 @@ export class ImportarDados {
   ) {}
 
   async executar(dados: DadosBackup): Promise<void> {
-    if (dados.despesas?.length || dados.parcelas?.length) throw new ErroDominio('Este backup contém despesas e parcelas do servidor. Conecte o servidor para restaurar sem perder lançamentos.');
+    if (dados.despesas?.length || dados.parcelas?.length || dados.operacaoClinica?.length) throw new ErroDominio('Este backup contém dados administrativos do servidor. Conecte o servidor para restaurar sem perder registros.');
     // "Aceita tudo ou rejeita" (pedido explícito — sem restauração pela
     // metade): reidrata TODAS as coleções em memória antes de gravar
     // qualquer coisa. Se algum item não puder virar entidade — mesmo

@@ -1,3 +1,7 @@
+import { ListaEsperaPage } from '../pages/lista-espera-page.js';
+import { MateriaisPage } from '../pages/materiais-page.js';
+import { MensagensPage } from '../pages/mensagens-page.js';
+import { AjudaPage } from '../pages/ajuda-page.js';
 import { AbaAtendimento } from '../features/consultas/aba-atendimento.js';
 import { SimuladorPage } from '../../demo/demonstracao.js';
 import { TutorialPage } from '../pages/tutorial-page.js';
@@ -38,6 +42,10 @@ const router = createHashRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <HomePage /> },
+      {path:'lista-espera',element:<ListaEsperaPage/>},
+      {path:'materiais',element:<MateriaisPage/>},
+      {path:'mensagens',element:<MensagensPage/>},
+      {path:'ajuda',element:<AjudaPage/>},
       { path: 'simulador', element: <SimuladorPage /> },
       { path: 'agenda', element: <AgendaPage /> },
       { path: 'relatorios', element: <RelatoriosPage /> },

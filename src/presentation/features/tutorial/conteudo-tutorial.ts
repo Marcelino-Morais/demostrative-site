@@ -3,6 +3,33 @@ export interface ModuloTutorial { id: string; nome: string; paciente?: boolean; 
 const e = (titulo: string, texto: string, rota: string, alvo: string, alternativo?: string, ausente?: string): EtapaTutorial => ({ titulo, texto, rota, alvo, alternativo, ausente });
 const ficha = '/pacientes/:pacienteId';
 export const MODULOS_TUTORIAL: ModuloTutorial[] = [
+ {id:'busca-global',nome:'Encontrar uma ficha sem voltar à lista',etapas:[
+  e('Busque de qualquer página','A lupa no cabeçalho abre uma busca por nome ou contato. Digite pelo menos dois caracteres e escolha a pessoa pelo nome. Documentos continuam mascarados.','/','css:[data-tour="busca-global"]'),
+  e('Preserve o que está preenchendo','Se houver alteração não salva, a busca avisa e impede trocar de paciente. Salve ou cancele essa edição antes de abrir outra ficha.','/','css:[data-tour="busca-global"]'),
+ ]},
+ {id:'correcao-cadastral',nome:'Corrigir cadastro com conferência e histórico',paciente:true,etapas:[
+  e('Abra a correção na ficha certa','Use Corrigir cadastro com conferência quando identificar um erro. A edição comum continua protegida. Pacientes arquivados precisam ser reativados antes.',`${ficha}/dados`,'css:[data-tour="correcoes-cadastro"]'),
+  e('Confira os novos dados','Informe as correções e um motivo claro. CPF e RG atuais não são revelados; deixe os campos de novo documento vazios para manter os atuais. Veja a prévia e confirme a identidade com o paciente antes de salvar.',`${ficha}/dados`,'css:[data-tour="correcoes-cadastro"]'),
+  e('Revise o histórico','O botão Ver histórico de correções mostra o antes, o depois e o motivo, com documentos mascarados. Ao mudar o celular, confirme as autorizações de mensagens novamente para o novo número.',`${ficha}/dados`,'css:[data-tour="correcoes-cadastro"]'),
+ ]},
+ {id:'lista-espera',nome:'Organizar encaixes na lista de espera',etapas:[
+  e('Registre a disponibilidade','Escolha um paciente ativo e escreva os dias ou horários em que pode vir. Adicionar à lista não cria consulta e não envia mensagem.','/lista-espera','css:[data-tour="lista-espera"]'),
+  e('Combine antes de agendar','Quando surgir uma vaga, abra a ficha e faça o contato. Marcar contato feito registra apenas o que a equipe informou; não prova envio nem aceite. Confira a duração e os conflitos na Agenda.','/lista-espera','css:[data-tour="lista-espera"]'),
+  e('Finalize o pedido','Depois de combinar e agendar, marque como resolvido. Cancelar encerra o pedido sem apagar o histórico. Use a caixa de seleção para rever os encerrados.','/lista-espera','css:[data-tour="lista-espera"]'),
+ ]},
+ {id:'materiais',nome:'Controlar materiais, validade e reposição',etapas:[
+  e('Cadastre o item ou lote','Abra Cadastrar material ou novo lote. Informe nome, unidade, quantidade inicial, lote e validade quando houver. O mínimo informado aciona o aviso de reposição.','/materiais','texto:Cadastrar material ou novo lote'),
+  e('Registre entradas e saídas','No cartão do material, use Registrar entrada ou saída. Confira a unidade, informe quantidade inteira e motivo. O saldo não pode ficar negativo; abrir um atendimento não desconta estoque.','/materiais','css:[data-tour="materiais"]'),
+  e('Confira avisos e histórico','Revise validade e reposição nos cartões. O histórico mantém cada entrada e saída. Só é possível arquivar um item sem saldo; registre o descarte quando cabível antes de arquivar.','/materiais','css:[data-tour="materiais"]'),
+ ]},
+ {id:'mensagens',nome:'Entender programação, envio e entrega',etapas:[
+  e('Consulte sem disparar','Esta página apenas acompanha a fila. Use o filtro para separar programadas, pendentes, enviadas, entregues e falhas. Atualizar não manda mensagens.','/mensagens','css:[data-tour="acompanhar-mensagens"]'),
+  e('Enviada não é entregue','Entrega ou leitura só aparece com confirmação do provedor. Sem confirmação não prova que a pessoa não recebeu. Confira os detalhes antes de reenviar para não duplicar o aviso.','/mensagens','css:[data-tour="acompanhar-mensagens"]'),
+ ]},
+ {id:'relatar-problema',nome:'Preparar um relato para a manutenção',etapas:[
+  e('Explique o que aconteceu','Use Relatar problema nesta página, no rodapé, ou abra Ajuda. Descreva o que tentou e o resultado. Não inclua nomes, documentos, contatos, senhas ou informações clínicas.','/ajuda','css:[data-tour="relatar-problema"]'),
+  e('Revise antes de compartilhar','A prévia inclui sua descrição, a área e a versão. Não anexa prontuários, imagens nem registros automaticamente. Confirme a revisão para guardar localmente ou copiar e enviar pelo canal que escolher.','/ajuda','css:[data-tour="relatar-problema"]'),
+ ]},
  { id:'atendimento',nome:'Do preparo ao encerramento do atendimento',paciente:true,etapas:[
   e('1. Confira a consulta','Nesta área, confira o paciente, o dia, o horário e o procedimento previsto. Abrir esta página não marca a consulta como realizada.',`${ficha}/atendimento`,'css:[data-tour="atendimento-unificado"]'),
   e('2. Leia os alertas de saúde','Leia os pontos de atenção e confirme as informações com o paciente. Abra a anamnese completa quando necessário; um campo vazio não significa ausência de problema.',`${ficha}/atendimento`,'css:[data-tour="alertas-clinicos"]'),

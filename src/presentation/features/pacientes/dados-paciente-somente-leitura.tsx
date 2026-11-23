@@ -1,4 +1,5 @@
 import { ShieldCheck } from 'lucide-react';
+import { CorrecaoCadastral } from './correcao-cadastral.js';
 import type { PacienteProps } from '../../../domain/entities/paciente.js';
 import { mascararCpf, mascararRg } from '../../../domain/value-objects/documento-mascarado.js';
 import { Alert } from '../../components/ui/alert.js';
@@ -60,6 +61,7 @@ export function DadosPacienteSomenteLeitura({ paciente }: { paciente: PacientePr
         <Campo rotulo="Indicado por" valor={paciente.indicadoPor} />
         <Campo rotulo="Endereço" valor={paciente.endereco} />
       </dl>
+      <CorrecaoCadastral paciente={paciente} />
     </Card>
   );
 }

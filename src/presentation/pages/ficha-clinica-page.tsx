@@ -100,6 +100,7 @@ export function FichaClinicaPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<'nao-encontrado' | 'offline' | null>(null);
   const [chaveRecarregar, setChaveRecarregar] = useState(0);
+  useEffect(()=>{const corrigido=(evento:Event)=>{if((evento as CustomEvent<string>).detail===pacienteId)setChaveRecarregar(v=>v+1);};window.addEventListener('paciente-corrigido',corrigido);return()=>window.removeEventListener('paciente-corrigido',corrigido);},[pacienteId]);
 
   useEffect(() => {
     if (!pacienteId) return;

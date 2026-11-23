@@ -1,5 +1,7 @@
 import { colecoes, configuracao, financeiro, iniciarAmostra, solicitacoes, propor, confirmar, falar, avisarMudanca, dia, type Linha } from './estado.js';
 import { PlanoTratamento } from '../domain/entities/plano-tratamento.js';
+import { aplicarOperacao, consultarOperacao, estadoOperacaoVazio, CAMPOS_CORRECAO } from '../../server/operacao-clinica-regras.mjs';
+import { mascararCpf, mascararRg } from '../../server/pacientes-mascara.mjs';
 
 /** Armazenamento efêmero: nem fichas, nem tutorial, nem preferências ficam no disco. */
 class Memoria implements Storage {
@@ -14,6 +16,14 @@ class Memoria implements Storage {
 Object.defineProperty(window,'localStorage',{value:new Memoria(),configurable:true});
 Object.defineProperty(window,'sessionStorage',{value:new Memoria(),configurable:true});
 iniciarAmostra();
+let estadoAdministrativo:Linha=estadoOperacaoVazio();
+const emDemo=new Date().toISOString();
+estadoAdministrativo.versao=1;
+estadoAdministrativo.materiais=[{id:'demo-luvas',nome:'Luvas de procedimento (exemplo)',unidade:'caixa',lote:'DEMO-A',validade:dia(45),minimo:3,arquivado:false,criadoEm:emDemo},{id:'demo-vencido',nome:'Material ilustrativo para conferir validade',unidade:'unidade',lote:'DEMO-B',validade:dia(-2),minimo:2,arquivado:false,criadoEm:emDemo}];
+estadoAdministrativo.movimentos=[{id:'demo-luvas-inicial',materialId:'demo-luvas',tipo:'ENTRADA',quantidade:6,motivo:'Saldo fictício de demonstração',criadoEm:emDemo},{id:'demo-vencido-inicial',materialId:'demo-vencido',tipo:'ENTRADA',quantidade:1,motivo:'Saldo fictício de demonstração',criadoEm:emDemo}];
+estadoAdministrativo.espera=[{id:'demo-espera',pacienteId:'demo-paciente-2',preferencia:'Pode antecipar para as manhãs',observacao:'Exemplo fictício de encaixe',status:'AGUARDANDO',versao:1,criadoEm:emDemo}];
+const dadosAdministrativos=()=>({'operacao-clinica':{operacao:estadoAdministrativo},pacientes:Object.fromEntries((colecoes.pacientes??[]).map(p=>[p.id,p]))});
+const mensagensDemo=['PENDENTE','ENVIADA','ENVIADA','ENVIADA','FALHA','BLOQUEADA','AGUARDANDO_PROVEDOR'].map((status,i)=>({id:'demo-mensagem-'+i,pacienteId:'demo-paciente-'+(i%3+1),pacienteNome:['Ana Clara Oliveira','Bruno Henrique Lima','Carla Beatriz Santos'][i%3],tipo:i%2?'CONFIRMACAO':'LEMBRETE_24H',status,numeroMascarado:'(**) *****-0000',agendadaPara:new Date(Date.now()+(i===0?3600000:-i*600000)).toISOString(),ultimoErro:status==='FALHA'?'falha-sintetica':null,statusEntregaProvedor:i===2?'delivered':i===3?'read':null,proximaTentativaEm:status==='FALHA'?new Date(Date.now()+600000).toISOString():null}));
 localStorage.setItem('pf-encerramentos-vistos',JSON.stringify((colecoes.consultas??[]).map(c=>`${c.id}:${c.atualizadoEm}`)));
 const json=(corpo:unknown,status=200)=>new Response(JSON.stringify(corpo),{status,headers:{'content-type':'application/json'}});
 const indisponivel=()=>json({erro:{codigo:'somente-demonstracao',mensagem:'Esta integração é apenas ilustrativa. Use Simular atendimento para conhecer o fluxo.'}},422);
@@ -35,6 +45,14 @@ window.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
   let corpo:Linha={};if(typeof init?.body==='string'){try{corpo=JSON.parse(init.body);}catch{return json({erro:{mensagem:'Conteúdo inválido'}},400);}}
   if(url.origin!==location.origin)return indisponivel();
   const partes=caminho.split('/').filter(Boolean).map(decodeURIComponent);const recurso=partes[1]??'';const id=partes[2]??'';const acao=partes[3]??'';
+  if(recurso==='operacao'){
+   try{
+    if(metodo==='GET')return json(consultarOperacao(dadosAdministrativos(),id,acao));
+    const dados=structuredClone(dadosAdministrativos());const assinatura=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(corpo))))).map(v=>v.toString(16).padStart(2,'0')).join('');
+    const resultado=aplicarOperacao(dados,id,corpo,new Date().toISOString(),assinatura);estadoAdministrativo=dados['operacao-clinica'].operacao;colecoes.pacientes=Object.values(dados.pacientes);avisarMudanca();return json(resultado);
+   }catch(e){return json({erro:{mensagem:e instanceof Error?e.message:'Confira os dados.'}},(e as {status?:number}).status??422);}
+  }
+  if(caminho==='/api/whatsapp-automatico/status')return json({provedorConfigurado:false,nomeProvedor:null,motivo:'demonstracao',porStatus:{},mensagens:mensagensDemo});
   if(caminho==='/health')return json({ok:true,servico:'Demonstração local',versao:1,fatias:['nucleo','anamnese','arquivos'],armazenamento:{dados:true,arquivos:true,backups:true},app:{servindoBuild:true},backup:{total:0,ultimo:null},enderecoLan:null});
   if(caminho==='/acesso/status')return json({configurado:false,autenticado:true});
   if(caminho==='/api/clinica/configuracoes'){if(metodo==='PUT')Object.assign(configuracao,corpo);return json(configuracao);}
@@ -71,10 +89,10 @@ window.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
   if(caminho==='/api/gestao-financeira')return json(resumoFinanceiro());
   if(recurso==='gestao-financeira'&&['despesas','parcelas'].includes(id)){const lista=financeiro[id] as Linha[];if(partes[4]==='estornar'){const r=lista.find(r=>r.id===acao);if(r)r.canceladoEm=new Date().toISOString();}else if(metodo==='POST')lista.push({...corpo,id:crypto.randomUUID()});return json({ok:true});}
   if(recurso==='pacientes'&&acao==='buscar-documento')return json({ids:[]});
-  if(caminho==='/api/pacientes/buscar-documento')return json({ids:[]});
+  if(caminho==='/api/pacientes/buscar-documento'){const termo=String(corpo.termo??'').replace(/\D/g,'');return json({ids:termo.length>=3?(colecoes.pacientes??[]).filter(p=>['cpf','rg'].some(k=>String(p[k]??'').replace(/\D/g,'').includes(termo))).map(p=>p.id):[]});}
   if(recurso==='pacientes'&&acao==='perfil-forms')return json({foto:{disponivel:false,status:'SEM_FOTO',erro:null,atualizadaEm:null},revisao:null,importacaoFotosConfigurada:false});
   if(recurso==='pacientes'&&acao==='foto-perfil')return json(null,404);
-  if(recurso==='pacientes'&&acao==='documentos-impressao')return json({cpf:null,rg:null});
+  if(recurso==='pacientes'&&acao==='documentos-impressao'){const p=colecoes.pacientes?.find(p=>p.id===id);return json({cpf:p?.cpf??null,rg:p?.rg??null});}
   if(recurso==='pacientes'&&acao==='arquivos'){
     if(metodo==='POST'&&init?.body instanceof Blob){const h=new Headers(init.headers);const blob=init.body;if(blob.size>10*1024*1024)return indisponivel();const a={id:crypto.randomUUID(),pacienteId:id,nome:decodeURIComponent(h.get('x-arquivo-nome')??'Arquivo fictício'),tipoMime:blob.type||h.get('content-type')||'application/octet-stream',tamanhoBytes:blob.size,categoria:h.get('x-arquivo-categoria')??'OUTRO',descricao:decodeURIComponent(h.get('x-arquivo-descricao')??''),data:h.get('x-arquivo-data')??dia(),origem:'Teste temporário',criadoEm:new Date().toISOString()};metadados.push(a);bytes.set(a.id,blob);return json(a,201);}
     return json(metadados.filter(a=>a.pacienteId===id&&(partes[4]==='lixeira'?a.excluidoEm:!a.excluidoEm)));
@@ -83,8 +101,8 @@ window.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
   if(recurso==='pacientes'&&colecoes[acao])return json(colecoes[acao]!.filter(r=>r.pacienteId===id));
   if(colecoes[recurso]){
     const lista=colecoes[recurso]!;
-    if(metodo==='GET'){const registro=lista.find(r=>recurso==='anamneses'?r.pacienteId===id:r.id===id);return id?json(registro??null,registro?200:404):json(lista);}
-    if(metodo==='PUT'){const indice=lista.findIndex(r=>recurso==='anamneses'?r.pacienteId===id:r.id===id);const novo={...corpo,id:corpo.id??id};if(indice<0)lista.push(novo);else lista[indice]=novo;avisarMudanca();return json({ok:true});}
+    if(metodo==='GET'){const registro=lista.find(r=>recurso==='anamneses'?r.pacienteId===id:r.id===id);const exibir=(r:Linha)=>recurso==='pacientes'?{...r,cpf:mascararCpf(r.cpf),rg:mascararRg(r.rg)}:r;return id?json(registro?exibir(registro):null,registro?200:404):json(lista.map(exibir));}
+    if(metodo==='PUT'){const indice=lista.findIndex(r=>recurso==='anamneses'?r.pacienteId===id:r.id===id);let novo={...corpo,id:corpo.id??id};if(recurso==='pacientes'&&indice>=0)novo={...novo,...Object.fromEntries(CAMPOS_CORRECAO.map(k=>[k,lista[indice]![k]]))};if(indice<0)lista.push(novo);else lista[indice]=novo;avisarMudanca();return json({ok:true});}
     if(metodo==='DELETE'){const indice=lista.findIndex(r=>r.id===id);if(indice>=0)lista.splice(indice,1);return json({ok:true});}
   }
   if(recurso==='arquivos'){

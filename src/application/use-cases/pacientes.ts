@@ -62,7 +62,7 @@ export class AtualizarPaciente {
     });
     if (divergentes.length > 0) {
       throw new ErroDominio(
-        'Dados cadastrais não podem ser editados por aqui — ainda não existe um fluxo de correção autorizado neste sistema.',
+        'Dados cadastrais não podem ser editados por aqui — use o fluxo de correção com conferência e histórico na ficha.',
       );
     }
     paciente.atualizar(input);

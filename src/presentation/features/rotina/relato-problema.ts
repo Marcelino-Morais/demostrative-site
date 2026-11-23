@@ -1,0 +1,2 @@
+export function paginaParaRelato(pathname:string){return pathname.split(/[?#]/)[0]!.replace(/\/pacientes\/(?!novo(?:\/|$))[^/]+/,'/pacientes/:pacienteId').replace(/\/orcamento\/[^/]+/,'/orcamento/:planoId').replace(/^\/(anamnese|agendar)\/[^/]+/,'/$1/:token');}
+export function textoRelato(pagina:string,versao:string,descricao:string){return `Relato de problema\nPágina: ${paginaParaRelato(pagina)}\nVersão: ${versao}\n\n${descricao.trim()}`;}

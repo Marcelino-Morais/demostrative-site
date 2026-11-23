@@ -10,6 +10,6 @@ export function escolherTutorialAutomatico(pathname: string, search: string, pro
   try { pacienteId = decodeURIComponent(ficha[1]!); } catch { return null; }
   if ((!ficha[2] || ficha[2] === 'dados') && !progresso.primeiroAtendimentoOferecido && !visto('primeiro-atendimento')) id = 'primeiro-atendimento';
   else id = ({atendimento:'atendimento',anamnese:'anamnese', odontograma:'odontograma', 'plano-tratamento':'odontograma', consultas:'agenda', evolucao:'evolucao', documentos:'documentos', exames:'exames', arquivos:'exames'} as Record<string,string>)[ficha[2] ?? ''] ?? '';
- } else id = ({'/':'inicio', '/pacientes':'pacientes', '/agenda':temSolicitacoes ? 'pedido-forms' : 'agenda', '/relatorios':'relatorios', '/retornos':'aniversarios', '/aniversarios':'aniversarios', '/configuracoes':'backup', '/configuracoes/whatsapp-automatico':'whatsapp'} as Record<string,string>)[pathname] ?? '';
+ } else id = ({'/':'inicio', '/lista-espera':'lista-espera', '/materiais':'materiais', '/mensagens':'mensagens', '/ajuda':'relatar-problema', '/pacientes':'pacientes', '/agenda':temSolicitacoes ? 'pedido-forms' : 'agenda', '/relatorios':'relatorios', '/retornos':'aniversarios', '/aniversarios':'aniversarios', '/configuracoes':'backup', '/configuracoes/whatsapp-automatico':'whatsapp'} as Record<string,string>)[pathname] ?? '';
  return id && !visto(id) ? { id, pacienteId } : null;
 }

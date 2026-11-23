@@ -31,3 +31,7 @@ Publicação: o conteúdo compilado fica em `docs/`, com GitHub Pages configurad
 ## Rotina do dia
 
 O painel **Hoje na clínica** reúne consultas, pedidos, conferências e parcelas vencidas. **Iniciar atendimento** abre saúde, dentes e tratamento juntos. O encerramento começa pelo plano existente quando há um, para evitar cobrar novamente; os pagamentos continuam exigindo registro explícito. A lâmpada oferece também o guia do atendimento.
+
+## Organização e tutoriais
+
+Inclui busca global, correção cadastral conferida, lista de espera, materiais com estoque e validade, acompanhamento ilustrativo das mensagens e preparação de relatos. Os 26 tutoriais permanecem disponíveis pela lâmpada e pelas Configurações. As novas funções também usam somente a memória: recarregar apaga as alterações da demonstração.

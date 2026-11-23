@@ -1,9 +1,11 @@
+import { BuscaGlobalPaciente } from '../features/pacientes/busca-global-paciente.js';
+import { paginaParaRelato } from '../features/rotina/relato-problema.js';
 import { AvisosIntegracoes } from '../features/sincronizacao/avisos-integracoes.js';
 import { FaixaDemonstracao, EntradaDemonstracao } from '../../demo/demonstracao.js';
 import { AjudaDaPagina } from '../features/tutorial/ajuda-da-pagina.js';
 import { VisitaGuiada } from '../features/tutorial/visita-guiada.js';
 import { BoasVindasTutorial } from '../features/tutorial/boas-vindas-tutorial.js';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { BarChart3, CalendarDays, LayoutDashboard, LockKeyhole, Settings2, Users } from 'lucide-react';
 import { CONFIGURACAO_CLINICA } from '../../infrastructure/bootstrap/configuracao-clinica.js';
 import { BadgeSincronizacao } from '../features/sincronizacao/badge-sincronizacao.js';
@@ -133,6 +135,7 @@ function BotaoBloquearClinica() {
  * pra este sistema (Painel + Pacientes).
  */
 export function AppShell() {
+  const local=useLocation();
   const { pendentes } = useSolicitacoesPendentes();
   return (
     <>
@@ -186,7 +189,7 @@ export function AppShell() {
           <p className="text-sm font-medium text-neutral-700">
             {CONFIGURACAO_CLINICA.nomeClinica}
           </p>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2"><BuscaGlobalPaciente />
             <BadgeSincronizacao />
             <AjudaDaPagina />
             <BotaoBloquearClinica />
@@ -201,8 +204,8 @@ export function AppShell() {
               {CONFIGURACAO_CLINICA.nomeProfissional}
             </p>
           </div>
-          <div className="flex items-center gap-1">
-            <BadgeSincronizacao />
+          <div className="flex items-center gap-1"><BuscaGlobalPaciente />
+            <BadgeSincronizacao className="hidden min-[480px]:inline-flex" />
             <AjudaDaPagina />
             <BotaoBloquearClinica />
             <ThemeToggle />
@@ -213,7 +216,7 @@ export function AppShell() {
           <MarcaDaguaImpressao />
           <FaixaOffline /><AvisosIntegracoes />
           <AvisoEncerramentosConsultas />
-          <EntradaDemonstracao /><Outlet />
+          <EntradaDemonstracao /><Outlet /><div className="no-print p-4 text-right text-xs"><Link className="text-neutral-500 underline" to={`/ajuda?pagina=${encodeURIComponent(paginaParaRelato(local.pathname))}`}>Relatar problema nesta página</Link></div>
           <BoasVindasTutorial />
           <VisitaGuiada />
         </main>

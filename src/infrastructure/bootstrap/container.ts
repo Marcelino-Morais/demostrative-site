@@ -1,4 +1,5 @@
 import { GestaoFinanceira } from '../../application/use-cases/gestao-financeira.js';
+import { OperacaoClinica } from '../../application/use-cases/operacao-clinica.js';
 import { hojeIsoLocal } from '../../domain/types.js';
 import type { ApiClient } from '../../application/ports/api-client.js';
 import { HttpApiClient } from '../api/http-api-client.js';
@@ -403,7 +404,7 @@ export function criarContainer(opcoes: OpcoesContainer = {}) {
   // idempotente (nunca duplica, nunca sobrescreve preço já editado). Nunca
   // bloqueia a inicialização do app: falha de rede/servidor aqui não deve
   // impedir o resto do sistema de carregar.
-  // Demonstração: usa somente o catálogo fictício de estado.ts.
+  // Catálogo exclusivamente fictício da demonstração.
   // Prepara (nunca envia) as mensagens de cortesia do dia a cada boot —
   // idempotente por ano/paciente/campanha (ver `PrepararMensagensCortesiaDoDia`).
   void new PrepararMensagensCortesiaDoDia(pacientesRepo, campanhasComemorativasRepo, mensagensCortesiaRepo, supressaoCortesiaWhatsappApi)
@@ -414,6 +415,7 @@ export function criarContainer(opcoes: OpcoesContainer = {}) {
     : new LocalStorageConfiguracaoClinicaRepository();
 
   return {
+    operacaoClinica: new OperacaoClinica(usarBackend ? new HttpApiClient(CONFIGURACAO_API.baseUrl, CONFIGURACAO_API.token) : api ?? null),
     gestaoFinanceira: new GestaoFinanceira(usarBackend ? new HttpApiClient(CONFIGURACAO_API.baseUrl, CONFIGURACAO_API.token) : null),
     perfilForms: usarBackend ? new HttpPerfilForms(new HttpApiClient(CONFIGURACAO_API.baseUrl, CONFIGURACAO_API.token)) : api ? new HttpPerfilForms(api) : null,
     encerramentosConsultas: usarBackend ? new HttpEncerramentosConsultas(new HttpApiClient(CONFIGURACAO_API.baseUrl, CONFIGURACAO_API.token)) : null,
