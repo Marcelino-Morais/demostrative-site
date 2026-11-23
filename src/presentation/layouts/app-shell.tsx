@@ -1,3 +1,4 @@
+import { AvisosIntegracoes } from '../features/sincronizacao/avisos-integracoes.js';
 import { FaixaDemonstracao, EntradaDemonstracao } from '../../demo/demonstracao.js';
 import { AjudaDaPagina } from '../features/tutorial/ajuda-da-pagina.js';
 import { VisitaGuiada } from '../features/tutorial/visita-guiada.js';
@@ -210,7 +211,7 @@ export function AppShell() {
 
         <main id="conteudo-principal" className="clinic-main flex-1 print:relative">
           <MarcaDaguaImpressao />
-          <FaixaOffline />
+          <FaixaOffline /><AvisosIntegracoes />
           <AvisoEncerramentosConsultas />
           <EntradaDemonstracao /><Outlet />
           <BoasVindasTutorial />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { HojeNaClinica } from '../features/rotina/hoje-na-clinica.js';
 import { Link } from 'react-router-dom';
 import {
   Archive,
@@ -252,6 +253,7 @@ export function HomePage() {
         </Link>
       </div>
 
+      <HojeNaClinica />
       <Dialog open={dialogEnderecoAberto} onOpenChange={setDialogEnderecoAberto}>
         <DialogContent>
           <DialogTitle className="text-base font-semibold text-neutral-900">Endereço da clínica</DialogTitle>

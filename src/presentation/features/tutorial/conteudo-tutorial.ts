@@ -3,6 +3,12 @@ export interface ModuloTutorial { id: string; nome: string; paciente?: boolean; 
 const e = (titulo: string, texto: string, rota: string, alvo: string, alternativo?: string, ausente?: string): EtapaTutorial => ({ titulo, texto, rota, alvo, alternativo, ausente });
 const ficha = '/pacientes/:pacienteId';
 export const MODULOS_TUTORIAL: ModuloTutorial[] = [
+ { id:'atendimento',nome:'Do preparo ao encerramento do atendimento',paciente:true,etapas:[
+  e('1. Confira a consulta','Nesta área, confira o paciente, o dia, o horário e o procedimento previsto. Abrir esta página não marca a consulta como realizada.',`${ficha}/atendimento`,'css:[data-tour="atendimento-unificado"]'),
+  e('2. Leia os alertas de saúde','Leia os pontos de atenção e confirme as informações com o paciente. Abra a anamnese completa quando necessário; um campo vazio não significa ausência de problema.',`${ficha}/atendimento`,'css:[data-tour="alertas-clinicos"]'),
+  e('3. Registre dentes e trabalho','O odontograma e o orçamento estão na mesma página. Marque os dentes, registre as observações e confira o que será executado e cobrado.',`${ficha}/atendimento`,'css:[data-tour="mapa-dentes"]'),
+  e('4. Evolução e encerramento','Use Registrar evolução para descrever o que foi feito. Depois, confira o resultado e o valor. Se houver plano ou pagamento adiantado, confira o existente antes de criar nova cobrança. Retornos são combinados separadamente.',`${ficha}/atendimento`,'texto:Conferir resultado e valor'),
+ ]},
  { id:'primeiro-paciente',nome:'Receber o primeiro paciente',cenario:true,continuarCadastro:true,etapas:[
   e('1. Confira se já existe cadastro','Comece buscando a pessoa pelo nome ou contato. Se encontrar uma ficha, use a existente. Para receber o primeiro paciente pelo sistema, siga para o cadastro.','/pacientes','css:main input'),
   e('2. Identifique a pessoa','Digite o nome completo como a pessoa informa. Esta é a identificação usada na agenda, no tratamento e nos documentos. Durante esta explicação nada é digitado ou salvo.','/pacientes/novo','campo:Nome completo'),
@@ -44,6 +50,7 @@ export const MODULOS_TUTORIAL: ModuloTutorial[] = [
  { id:'inicio', nome:'Conhecer o sistema', etapas:[
   e('Este é o painel', 'Aqui você acompanha o consultório. Planejado é o que foi combinado; recebido é o pagamento registrado. Use Próximo para conhecer as telas.', '/', 'texto:Visão geral'),
   e('A agenda fica aqui', 'Este botão abre os horários e as solicitações recebidas dos formulários. No celular, o menu fica embaixo.', '/', 'css:[data-tour="menu-agenda"]'),
+  e('Hoje na clínica','Este resumo reúne as consultas do dia, os pedidos para analisar, os atendimentos a conferir e as parcelas vencidas. Use Iniciar atendimento para abrir os alertas, os dentes e o tratamento juntos.','/','css:[data-tour="hoje-na-clinica"]'),
   e('Encontre os pacientes', 'Nesta tela você busca e abre uma ficha. Confira se a pessoa já está cadastrada antes de criar outra.', '/pacientes','css:main input'),
   e('Cadastro de uma pessoa', 'Preencha o nome completo aqui e confira os demais dados. Esta visita apenas mostra o formulário: não preenche nem salva nada.', '/pacientes/novo','campo:Nome completo'),
   e('Criar uma consulta', 'Use Nova consulta para abrir o agendamento. Depois escolha paciente, data, hora e duração. Confira o intervalo inteiro antes de confirmar.', '/agenda','texto:Nova consulta'),

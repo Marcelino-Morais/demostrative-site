@@ -9,24 +9,25 @@ import { Alert } from '../components/ui/alert.js';
 import { DialogEncerrarAtendimento } from '../features/consultas/dialog-encerrar-atendimento.js';
 import { formatarDataIso } from '../lib/formatadores.js';
 
-const Contexto=createContext<{pendentes:AtendimentoParaEncerrar[];erro:string|null;abrir:(id?:string)=>Promise<void>;versao:number}|null>(null);
+const Contexto=createContext<{pendentes:AtendimentoParaEncerrar[];erro:string|null;abrir:(id?:string)=>Promise<void>;versao:number;verificado:boolean}|null>(null);
 const chave=(i:AtendimentoParaEncerrar)=>`${i.consulta.id}:${i.consulta.atualizadoEm}`;
 function vistos():string[]{try{const v:unknown=JSON.parse(localStorage.getItem('pf-encerramentos-vistos')??'[]');return Array.isArray(v)?v.filter((x):x is string=>typeof x==='string'):[];}catch{return [];}}
 export function EncerramentosConsultasProvider({children}:{children:ReactNode}){
   const api=useContainer().encerramentosConsultas;
   const edicao=useExisteEdicaoPendente();
   const [pendentes,setPendentes]=useState<AtendimentoParaEncerrar[]>([]),[erro,setErro]=useState<string|null>(null);
+  const [verificado,setVerificado]=useState(false);
   const [aberta,setAberta]=useState(false),[selecionada,setSelecionada]=useState<AtendimentoParaEncerrar|null>(null),[versao,setVersao]=useState(0);
   const assinatura=useRef(''),emVoo=useRef(false),geracao=useRef(0),liberar=useRef<(()=>void)|null>(null);
   const listaRef=useRef(pendentes);listaRef.current=pendentes;
   const buscar=useCallback(async()=>{
     if(!api||emVoo.current)return;emVoo.current=true;const g=geracao.current;
     try{const lista=await api.listar();if(g!==geracao.current)return;
-      setPendentes(lista);setErro(null);const s=JSON.stringify(lista);if(s!==assinatura.current){assinatura.current=s;setVersao(v=>v+1);}
+      setPendentes(lista);setVerificado(true);setErro(null);const s=JSON.stringify(lista);if(s!==assinatura.current){assinatura.current=s;setVersao(v=>v+1);}
     }catch(e){if(g===geracao.current){if(e instanceof ErroApi&&e.status===401){setPendentes([]);setAberta(false);setSelecionada(null);liberar.current?.();liberar.current=null;}setErro('Não foi possível verificar atendimentos aguardando conferência.');}}
-    finally{emVoo.current=false;}
+    finally{if(g===geracao.current)emVoo.current=false;}
   },[api]);
-  useEffect(()=>{const g=++geracao.current;void buscar();const t=setInterval(()=>void buscar(),20000);const foco=()=>void buscar();window.addEventListener('focus',foco);window.addEventListener('online',foco);return()=>{geracao.current=g+1;clearInterval(t);window.removeEventListener('focus',foco);window.removeEventListener('online',foco);liberar.current?.();};},[buscar]);
+  useEffect(()=>{const g=++geracao.current;void buscar();const t=setInterval(()=>void buscar(),20000);const foco=()=>void buscar();window.addEventListener('focus',foco);window.addEventListener('online',foco);return()=>{geracao.current=g+1;emVoo.current=false;clearInterval(t);window.removeEventListener('focus',foco);window.removeEventListener('online',foco);liberar.current?.();};},[buscar]);
   function fechar(){
     try{localStorage.setItem('pf-encerramentos-vistos',JSON.stringify([...new Set([...vistos(),...listaRef.current.map(chave)])].slice(-500)));}catch{/* aviso permanece no painel */}
     setAberta(false);setSelecionada(null);liberar.current?.();liberar.current=null;
@@ -58,7 +59,7 @@ export function EncerramentosConsultasProvider({children}:{children:ReactNode}){
     setSelecionada(null);await buscar();setVersao(v=>v+1);
     if(!aberta){liberar.current?.();liberar.current=null;}
   }
-  return <Contexto.Provider value={{pendentes,erro,abrir,versao}}>{children}
+  return <Contexto.Provider value={{pendentes,erro,abrir,versao,verificado}}>{children}
     <Dialog open={aberta&&!selecionada} onOpenChange={v=>{if(!v)fechar();}}><DialogContent>
       <DialogTitle className="text-lg font-semibold">Conferir atendimentos</DialogTitle>
       <DialogDescription className="mt-2">Confirme se houve atendimento e confira o valor. Nenhuma consulta é marcada como realizada apenas pelo horário.</DialogDescription>

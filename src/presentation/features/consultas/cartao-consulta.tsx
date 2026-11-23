@@ -153,6 +153,7 @@ export function CartaoConsulta({
           )}
           {(snap.status === 'AGENDADA' || snap.status === 'CONFIRMADA') && (
             <>
+              <Link className="font-semibold text-brand-700 underline" to={`/pacientes/${snap.pacienteId}/atendimento?consulta=${encodeURIComponent(snap.id)}`}>Iniciar atendimento</Link>
               <button
                 type="button"
                 onClick={() => encerramentos && container.encerramentosConsultas ? void encerramentos.abrir(snap.id) : void executar(() => container.consulta.marcarRealizada.executar(snap.id))}

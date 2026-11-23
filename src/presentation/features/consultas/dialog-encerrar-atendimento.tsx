@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { AtendimentoParaEncerrar, DecisaoEncerramento } from '../../../application/ports/porta-encerramentos-consultas.js';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../components/ui/dialog.js';
 import { Input, Select } from '../../components/ui/input.js';
@@ -10,18 +10,20 @@ import { mensagemDeErro } from '../../lib/erros.js';
 export function DialogEncerrarAtendimento({item,onFechar,onDecidir}:{item:AtendimentoParaEncerrar;onFechar:()=>void;onDecidir:(d:DecisaoEncerramento)=>Promise<void>}){
   const c=item.consulta;
   const [status,setStatus]=useState<DecisaoEncerramento['status']>('REALIZADA');
-  const [modo,setModo]=useState<'NOVO'|'EXISTENTE'>('NOVO');
-  const [planoId,setPlanoId]=useState('');
+  const [modo,setModo]=useState<'NOVO'|'EXISTENTE'>(item.planos.length?'EXISTENTE':'NOVO');
+  const [planoId,setPlanoId]=useState(item.planos.length===1?item.planos[0]!.id:'');
+  const salvando=useRef(false);
   const [valor,setValor]=useState(c.orcamento?.valorCentavos != null ? (c.orcamento.valorCentavos/100).toFixed(2).replace('.',',') : '');
   const [erro,setErro]=useState<string|null>(null),[ocupado,setOcupado]=useState(false);
   const centavos=/^\d+(?:[,.]\d{1,2})?$/.test(valor.trim()) ? Math.round(Number(valor.replace(',','.'))*100) : null;
   async function salvar(){
+    if(salvando.current)return;
     if(status==='REALIZADA'&&modo==='NOVO'&&(centavos==null||!Number.isSafeInteger(centavos)||centavos>100000000)){setErro('Informe o valor do procedimento. Use 0 para atendimento sem cobrança.');return;}
     if(status==='REALIZADA'&&modo==='EXISTENTE'&&!planoId){setErro('Escolha o plano que já inclui este atendimento.');return;}
-    setOcupado(true);setErro(null);
+    salvando.current=true;setOcupado(true);setErro(null);
     try{await onDecidir({status,modoFinanceiro:modo,valorCentavos:centavos,planoId,atualizadoEm:c.atualizadoEm});}
     catch(e){setErro(mensagemDeErro(e,'Não foi possível encerrar. Recarregue para conferir se a consulta foi alterada.'));}
-    finally{setOcupado(false);}
+    finally{salvando.current=false;setOcupado(false);}
   }
   return <Dialog open onOpenChange={aberta=>{if(!aberta&&!ocupado)onFechar();}}><DialogContent>
     <DialogTitle className="text-lg font-semibold">Conferir atendimento</DialogTitle>
@@ -30,6 +32,7 @@ export function DialogEncerrarAtendimento({item,onFechar,onDecidir}:{item:Atendi
       {item.financeiroIndisponivel&&<Alert tone="danger">O plano vinculado não foi encontrado. Confira o prontuário ou restaure a cópia de segurança. Outra cobrança não será criada automaticamente.</Alert>}
       {c.status==='REALIZADA'?<p className="text-sm">Esta consulta já foi marcada como realizada. Falta conferir o registro financeiro.</p>:<label className="text-sm">O que aconteceu?<Select aria-label="Resultado do atendimento" value={status} onChange={e=>setStatus(e.target.value as typeof status)}><option value="REALIZADA">Atendimento realizado</option><option value="FALTOU">Paciente faltou</option><option value="CANCELADA">Atendimento cancelado</option></Select></label>}
       {status==='REALIZADA'&&<>
+        <div data-tour="checklist-encerramento" className="rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm dark:bg-neutral-900/30"><h3 className="font-semibold">Antes de encerrar, confira</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-neutral-600"><li>O trabalho realizado e a evolução clínica foram registrados?</li><li>Este valor já faz parte de um plano? Confira para não cobrar duas vezes.</li><li>Houve pagamento, inclusive adiantado? Registre ou confira no plano.</li><li>É necessário combinar um retorno?</li></ul><p className="mt-2 text-xs text-neutral-500">Este lembrete não preenche o prontuário nem registra pagamento automaticamente.</p></div>
         <label className="text-sm">Registro financeiro<Select aria-label="Registro financeiro" value={modo} onChange={e=>setModo(e.target.value as typeof modo)}><option value="NOVO">Registrar valor deste atendimento</option>{item.planos.length>0&&<option value="EXISTENTE">Já está incluído em um plano</option>}</Select></label>
         {modo==='NOVO'?<>
           <p className="text-sm text-neutral-500">{c.orcamento?.descricao || c.motivo || 'Procedimento a conferir'}</p>

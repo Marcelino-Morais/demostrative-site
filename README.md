@@ -27,3 +27,7 @@ Requer Node.js 22.12 ou superior. Execute `npm ci`, depois `npm run dev`. `npm r
 O repositório contém apenas código de apresentação, regras compartilhadas sem integração e imagens públicas da interface. Nunca copie arquivos `.env`, `server/dados`, backups, sessões WAHA ou credenciais para cá.
 
 Publicação: o conteúdo compilado fica em `docs/`, com GitHub Pages configurado para a pasta `/docs` da branch `main`. A navegação usa `#`, inclusive para permitir abrir e recarregar qualquer tela sem servidor.
+
+## Rotina do dia
+
+O painel **Hoje na clínica** reúne consultas, pedidos, conferências e parcelas vencidas. **Iniciar atendimento** abre saúde, dentes e tratamento juntos. O encerramento começa pelo plano existente quando há um, para evitar cobrar novamente; os pagamentos continuam exigindo registro explícito. A lâmpada oferece também o guia do atendimento.

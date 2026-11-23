@@ -36,6 +36,7 @@ export function iniciarAmostra() {
   const registro=RegistroDental.registrar({pacienteId:'demo-paciente-1',numeroDente:21,face:null,tipo:'CONDICAO_INICIAL',condicao:'CARIADO',descricao:'Restauração planejada — exemplo fictício',data:dia(-1),profissionalResponsavel:'Dra. Fernanda Morais Mendes',valorCentavos:18000});
   colecoes['registros-dentais']!.push(registro.toSnapshot());
   [['Limpeza e orientação',15000],['Restauração em resina',18000],['Avaliação no consultório',10000]].forEach(([nome,preco],i)=>{colecoes['procedimentos-catalogo']!.push(ProcedimentoCatalogo.criar({nome:String(nome),categoria:'Demonstração',precoCentavos:Number(preco)},`demo-procedimento-${i}`).toSnapshot());});
+  financeiro.parcelas=[{id:'demo-parcela',pacienteId:'demo-paciente-2',planoId:'demo-plano-2',data:dia(-2),descricao:'Parcela fictícia',valorCentavos:10000,saldoCentavos:10000}];
   financeiro.despesas=[{id:'demo-despesa',data:dia(),descricao:'Material odontológico (exemplo)',valorCentavos:4500}];
 }
 export function criarPedido(data: string, horario: string, motivoPaciente: string) {

@@ -1,4 +1,5 @@
 import { colecoes, configuracao, financeiro, iniciarAmostra, solicitacoes, propor, confirmar, falar, avisarMudanca, dia, type Linha } from './estado.js';
+import { PlanoTratamento } from '../domain/entities/plano-tratamento.js';
 
 /** Armazenamento efêmero: nem fichas, nem tutorial, nem preferências ficam no disco. */
 class Memoria implements Storage {
@@ -13,6 +14,7 @@ class Memoria implements Storage {
 Object.defineProperty(window,'localStorage',{value:new Memoria(),configurable:true});
 Object.defineProperty(window,'sessionStorage',{value:new Memoria(),configurable:true});
 iniciarAmostra();
+localStorage.setItem('pf-encerramentos-vistos',JSON.stringify((colecoes.consultas??[]).map(c=>`${c.id}:${c.atualizadoEm}`)));
 const json=(corpo:unknown,status=200)=>new Response(JSON.stringify(corpo),{status,headers:{'content-type':'application/json'}});
 const indisponivel=()=>json({erro:{codigo:'somente-demonstracao',mensagem:'Esta integração é apenas ilustrativa. Use Simular atendimento para conhecer o fluxo.'}},422);
 const metadados: Linha[]=[]; const bytes=new Map<string,Blob>(); const anotacoes:Record<string,Linha>={};
@@ -37,7 +39,24 @@ window.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
   if(caminho==='/acesso/status')return json({configurado:false,autenticado:true});
   if(caminho==='/api/clinica/configuracoes'){if(metodo==='PUT')Object.assign(configuracao,corpo);return json(configuracao);}
   if(caminho==='/api/nucleo/contagem')return json(Object.fromEntries(Object.entries(colecoes).map(([k,v])=>[k,v.length])));
-  if(recurso==='encerramentos-consultas')return json([]);
+  const paraEncerrar=(c:Linha)=>({consulta:c,nomePaciente:nome(c.pacienteId),planos:(colecoes.planos??[]).filter(p=>p.pacienteId===c.pacienteId&&p.status==='ATIVO'&&p.itens.length).map(p=>({id:p.id,descricao:p.itens.map((i:Linha)=>i.trabalhoAExecutar).join(', ')}))});
+  if(recurso==='encerramentos-consultas')return json((colecoes.consultas??[]).filter(c=>!c.encerramentoFinanceiro&&['AGENDADA','CONFIRMADA','REALIZADA'].includes(c.status)&&new Date(`${c.data}T${c.horario}:00-03:00`).getTime()+c.duracaoMinutos*60000<=Date.now()).map(paraEncerrar));
+  if(recurso==='consultas'&&acao==='encerramento'){
+   const c=colecoes.consultas?.find(c=>c.id===id);if(!c)return json(null,404);
+   if(metodo==='GET')return json(paraEncerrar(c));
+   if(c.atualizadoEm!==corpo.atualizadoEm||c.encerramentoFinanceiro||!['AGENDADA','CONFIRMADA','REALIZADA'].includes(c.status))return json({erro:{mensagem:'A consulta mudou. Confira os dados novamente.'}},409);
+   if(!['REALIZADA','FALTOU','CANCELADA'].includes(corpo.status))return json({erro:{mensagem:'Confira o resultado.'}},422);
+   if(corpo.status==='REALIZADA'){
+    let plano=colecoes.planos?.find(p=>p.id===corpo.planoId&&p.pacienteId===c.pacienteId&&p.status==='ATIVO');
+    if(corpo.modoFinanceiro==='NOVO'){
+     if(!Number.isSafeInteger(corpo.valorCentavos)||corpo.valorCentavos<0)return json({erro:{mensagem:'Confira o valor.'}},422);
+     const p=PlanoTratamento.criar(c.pacienteId);p.adicionarItem({numeroDente:null,trabalhoAExecutar:c.motivo||'Atendimento',valorCentavos:corpo.valorCentavos});plano={...p.toSnapshot()};colecoes.planos!.push(plano);
+    }
+    if(!plano)return json({erro:{mensagem:'Escolha o plano deste paciente.'}},422);
+    c.encerramentoFinanceiro={planoId:plano.id,modo:corpo.modoFinanceiro,conferidoEm:new Date().toISOString()};
+   }
+   c.status=corpo.status;c.atualizadoEm=new Date().toISOString();avisarMudanca();return json({ok:true});
+  }
   if(recurso==='solicitacoes-agendamento'){
     if(id==='marcar-vistas'){solicitacoes.filter(s=>(corpo.ids??[]).includes(s.id)).forEach(s=>s.vistaPorEsteDispositivo=true);return json({ok:true});}
     if(!id)return json(solicitacoes);

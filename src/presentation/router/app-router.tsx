@@ -1,3 +1,4 @@
+import { AbaAtendimento } from '../features/consultas/aba-atendimento.js';
 import { SimuladorPage } from '../../demo/demonstracao.js';
 import { TutorialPage } from '../pages/tutorial-page.js';
 import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom';
@@ -58,6 +59,7 @@ const router = createHashRouter([
           { index: true, element: <Navigate to="dados" replace /> },
           { path: 'dados', element: <AbaDadosPaciente /> },
           { path: 'consultas', element: <AbaConsultas /> },
+          { path: 'atendimento', element: <AbaAtendimento /> },
           { path: 'anamnese', element: <AbaAnamnese /> },
           { path: 'odontograma', element: <AbaOdontograma /> },
           { path: 'plano-tratamento', element: <AbaOdontograma /> },

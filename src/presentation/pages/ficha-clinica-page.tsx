@@ -20,6 +20,7 @@ export interface FichaClinicaContexto {
 }
 
 const ABAS = [
+  { to: 'atendimento', label: 'Atendimento' },
   { to: 'dados', label: 'Dados' },
   { to: 'consultas', label: 'Consultas' },
   { to: 'anamnese', label: 'Anamnese' },
