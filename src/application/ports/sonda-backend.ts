@@ -57,6 +57,7 @@ export interface SaudeBackend {
    * endereço o navegador da Dra. Fernanda tem aberto agora.
    */
   enderecoLan?: string | null;
+  portaHttp?: number;
 }
 
 export interface SondaBackend {

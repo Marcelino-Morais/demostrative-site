@@ -82,6 +82,7 @@ export class HttpSondaBackend implements SondaBackend {
         armazenamento: lerArmazenamento(corpo.armazenamento),
         app: typeof corpo.app?.servindoBuild === 'boolean' ? { servindoBuild: corpo.app.servindoBuild } : undefined,
         backup: lerBackup(corpo.backup),
+        portaHttp: typeof corpo.portaHttp === 'number' && Number.isInteger(corpo.portaHttp) && corpo.portaHttp > 0 && corpo.portaHttp <= 65535 ? corpo.portaHttp : undefined,
         enderecoLan: typeof corpo.enderecoLan === 'string' ? corpo.enderecoLan : null,
       };
     } catch {

@@ -78,6 +78,7 @@ export const MODULOS_TUTORIAL: ModuloTutorial[] = [
   e('Este é o painel', 'Aqui você acompanha o consultório. Planejado é o que foi combinado; recebido é o pagamento registrado. Use Próximo para conhecer as telas.', '/', 'texto:Visão geral'),
   e('A agenda fica aqui', 'Este botão abre os horários e as solicitações recebidas dos formulários. No celular, o menu fica embaixo.', '/', 'css:[data-tour="menu-agenda"]'),
   e('Hoje na clínica','Este resumo reúne as consultas do dia, os pedidos para analisar, os atendimentos a conferir e as parcelas vencidas. Use Iniciar atendimento para abrir os alertas, os dentes e o tratamento juntos.','/','css:[data-tour="hoje-na-clinica"]'),
+  e('Acesse em outro aparelho','Copie aqui o endereço do painel para um dispositivo conectado à mesma rede da clínica. Entre com a senha da clínica; mantenha o computador principal e o servidor ligados. Este link é da equipe, não dos pacientes.','/','css:[data-tour="acesso-painel-rede"]'),
   e('Encontre os pacientes', 'Nesta tela você busca e abre uma ficha. Confira se a pessoa já está cadastrada antes de criar outra.', '/pacientes','css:main input'),
   e('Cadastro de uma pessoa', 'Preencha o nome completo aqui e confira os demais dados. Esta visita apenas mostra o formulário: não preenche nem salva nada.', '/pacientes/novo','campo:Nome completo'),
   e('Criar uma consulta', 'Use Nova consulta para abrir o agendamento. Depois escolha paciente, data, hora e duração. Confira o intervalo inteiro antes de confirmar.', '/agenda','texto:Nova consulta'),
