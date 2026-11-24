@@ -1,3 +1,4 @@
+import { RespostaAnamneseRecebida } from './resposta-anamnese-recebida.js';
 import { useState } from 'react';
 import { Copy, ExternalLink, Link2 } from 'lucide-react';
 import type { Paciente } from '../../../domain/entities/paciente.js';
@@ -9,7 +10,7 @@ import { Input } from '../../components/ui/input.js';
 import { useContainer } from '../../providers/container-provider.js';
 import { BotaoWhatsapp } from '../../../../whatsapp-itens/src/presentation/features/whatsapp/botao-whatsapp.js';
 
-export function PainelLinkAnamnese({ paciente }: { paciente: Paciente; aoImportar?: () => void }) {
+export function PainelLinkAnamnese({ paciente,aoImportar,podeAplicar=true }: { paciente: Paciente; aoImportar?: () => void|Promise<void>;podeAplicar?:boolean }) {
   const container = useContainer();
   const [copiado, setCopiado] = useState(false);
   const [erro, setErro] = useState(false);
@@ -17,7 +18,7 @@ export function PainelLinkAnamnese({ paciente }: { paciente: Paciente; aoImporta
     try { await navigator.clipboard.writeText(LINK_FORMS_ANAMNESE); setCopiado(true); setErro(false); }
     catch { setErro(true); }
   }
-  return <Card className="no-print flex flex-col gap-3">
+  return <><div className="no-print"><RespostaAnamneseRecebida pacienteId={paciente.id} podeAplicar={podeAplicar} aoAplicar={aoImportar}/></div><Card className="no-print flex flex-col gap-3">
     <h2 className="flex items-center gap-2 text-sm font-semibold"><Link2 className="h-4 w-4" aria-hidden="true" />Anamnese pelo paciente</h2>
     <p className="text-sm text-neutral-600">Envie o formulário para o paciente preencher o histórico de saúde. Peça que informe o mesmo CPF, RG ou celular cadastrado na clínica.</p>
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -30,5 +31,5 @@ export function PainelLinkAnamnese({ paciente }: { paciente: Paciente; aoImporta
       preparar={() => container.whatsapp.prepararLinkAnamnese.executar(paciente.id, window.location.origin, null)}
       aoAbrir={async (numeroNormalizado, tipo) => { await container.whatsapp.registrarAbertura.executar({ pacienteId: paciente.id, numeroNormalizado, tipo }); }} />
     <p className="text-xs text-neutral-500">As respostas dependem da sincronização do Google Forms e da identificação do paciente. Confira a anamnese recebida antes do atendimento.</p>
-  </Card>;
+  </Card></>;
 }

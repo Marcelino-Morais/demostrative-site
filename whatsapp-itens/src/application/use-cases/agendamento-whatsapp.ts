@@ -1,7 +1,7 @@
+import { LINK_FORMS_AGENDAMENTO } from '../../../../src/domain/value-objects/link-forms-agendamento.js';
 import { ErroDominio } from '../../../../src/domain/types.js';
 import {
   avaliarDisponibilidadeWhatsapp,
-  montarLinhaDeLinkParaPaciente,
   montarMensagemLinkAgendamentoWhatsapp,
   montarUrlWhatsapp,
   normalizarNumeroWhatsapp,
@@ -9,10 +9,7 @@ import {
   type IdentidadeClinica,
 } from '../../domain/value-objects/whatsapp.js';
 import type {
-  ConfirmarAgendamentoPublicoInput,
   GatewayAgendamentoWhatsapp,
-  ResultadoAberturaAgendamento,
-  ResultadoConfirmacaoAgendamento,
 } from '../ports/gateway-agendamento-whatsapp.js';
 import type { RepositorioPacientes, RepositorioRegistrosWhatsapp } from '../../../../src/application/ports/repositorios.js';
 import { agoraIso } from '../../../../src/domain/types.js';
@@ -29,7 +26,7 @@ export interface MensagemLinkAgendamentoPreparada {
 
 export class PrepararMensagemWhatsappLinkAgendamento {
   constructor(
-    private readonly gateway: GatewayAgendamentoWhatsapp,
+    _gateway: GatewayAgendamentoWhatsapp,
     private readonly pacientes: RepositorioPacientes,
     private readonly registros: RepositorioRegistrosWhatsapp,
     private readonly clinica: IdentidadeClinica,
@@ -37,24 +34,18 @@ export class PrepararMensagemWhatsappLinkAgendamento {
 
   async executar(
     pacienteId: string,
-    origem: string,
-    enderecoLan: string | null,
+    _origem: string,
+    _enderecoLan: string | null,
   ): Promise<MensagemLinkAgendamentoPreparada> {
     const paciente = await this.pacientes.buscarPorId(pacienteId);
     if (!paciente) throw new ErroDominio('Paciente não encontrado.');
     const p = paciente.toSnapshot();
     const disponibilidade = avaliarDisponibilidadeWhatsapp(p.celular, p.consentimentoWhatsapp.status);
     const numeroNormalizado = normalizarNumeroWhatsapp(p.celular);
-    const link = await this.gateway.gerarLink(pacienteId);
-    const linhaLink = montarLinhaDeLinkParaPaciente({
-      origemAtual: origem,
-      enderecoLan,
-      caminho: `/agendar/${encodeURIComponent(link.token)}`,
-    });
     const texto = montarMensagemLinkAgendamentoWhatsapp({
       nomeCompletoPaciente: p.nomeCompleto,
       clinica: this.clinica,
-      url: linhaLink,
+      url: LINK_FORMS_AGENDAMENTO,
     });
     const historico = (await this.registros.listarPorPacienteId(pacienteId)).map((r) => r.toSnapshot());
 
@@ -69,30 +60,6 @@ export class PrepararMensagemWhatsappLinkAgendamento {
   }
 }
 
-export class AbrirAgendamentoWhatsappPublico {
-  constructor(private readonly gateway: GatewayAgendamentoWhatsapp) {}
-
-  executar(token: string): Promise<ResultadoAberturaAgendamento> {
-    return this.gateway.abrirPublico(token);
-  }
-}
-
-export class ConfirmarAgendamentoWhatsappPublico {
-  constructor(private readonly gateway: GatewayAgendamentoWhatsapp) {}
-
-  executar(token: string, input: ConfirmarAgendamentoPublicoInput): Promise<ResultadoConfirmacaoAgendamento> {
-    return this.gateway.confirmarPublico(token, input);
-  }
-}
-
-/**
- * Consistência de dados (achado na auditoria da Etapa 27, mesma ideia
- * de `RevogarLinkAtivoDoPaciente` para anamnese, Etapa 20): ao ARQUIVAR
- * um paciente, um link de agendamento ainda ATIVO não deveria seguir
- * aceitando novas marcações de um ex-paciente. Revoga o link corrente
- * se — e só se — ele estiver ATIVO. Best-effort: se o servidor estiver
- * fora do ar, a chamada propaga o erro (a tela decide se avisa).
- */
 export class RevogarLinkAgendamentoAtivoDoPaciente {
   constructor(private readonly gateway: GatewayAgendamentoWhatsapp) {}
 

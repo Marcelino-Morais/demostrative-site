@@ -101,6 +101,7 @@ export const MODULOS_TUTORIAL: ModuloTutorial[] = [
  ]},
  { id:'anamnese',nome:'Anamnese e alertas',paciente:true,etapas:[
   e('Confira os alertas','Leia os pontos de atenção antes do atendimento. Um aviso resume o relato; confira a anamnese completa. Respostas ausentes não significam ausência de risco.',`${ficha}/anamnese`,'css:[data-tour="alertas-clinicos"]','css:main h1'),
+  e('Respostas recebidas','A primeira resposta do Forms aparece na ficha após sincronizar. Se já existe anamnese salva, use Conferir resposta recebida, revise as respostas e aplique somente após conferir. O acesso local antigo dos pacientes foi retirado.',`${ficha}/anamnese`,'css:main h1'),
   e('Solicitar a anamnese','Nesta área você copia, abre ou envia ao paciente o link do Google Forms. Peça a anamnese quando necessário e confira a vinculação da resposta.',`${ficha}/anamnese`,'texto:Anamnese pelo paciente','css:main h2'),
  ]},
  { id:'odontograma',nome:'Dentes, desenhos e tratamento',paciente:true,etapas:[
@@ -111,6 +112,7 @@ export const MODULOS_TUTORIAL: ModuloTutorial[] = [
  { id:'financeiro',nome:'Pagamentos e parcelas',paciente:true,etapas:[
   e('Combine o pagamento','Informe desconto, entrada e parcelas nas condições de pagamento do plano. Depois confira as parcelas efetivamente lançadas e seus vencimentos.',`${ficha}/odontograma`,'campo:Desconto à vista (%)','texto:Novo orçamento / tratamento','Crie primeiro um orçamento nesta ficha, fora da visita, para acessar condições e pagamentos.'),
   e('Registrar o recebimento','Quando receber, mesmo adiantado, registre data, valor, forma e as confirmações exigidas. Realizar uma consulta não significa que houve pagamento. Confira para não lançar o mesmo valor duas vezes.',`${ficha}/odontograma`,'campo:Valor recebido (R$)','texto:Novo orçamento / tratamento','Os campos de pagamento aparecem quando a ficha possui um orçamento.'),
+  e('Corrigir despesa ou parcela','Use Editar ao lado do lançamento. Corrija a data, a descrição e, quando permitido, o valor; informe o motivo. A correção mantém o histórico e os pagamentos. Parcelas de planos com pagamentos têm o valor protegido.', '/relatorios','css:[data-tour="fechamento-financeiro"]','css:main h1'),
   e('Parcelas e fechamento','Abra esta seção para acompanhar parcelas, recebimentos e fechamento. Dê baixa no que foi pago para evitar cobranças indevidas.',`${ficha}/odontograma`,'texto:Parcelas, recebimentos e fechamento financeiro'),
  ]},
  { id:'evolucao',nome:'Realização e evolução clínica',paciente:true,etapas:[

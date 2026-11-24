@@ -35,3 +35,7 @@ O painel **Hoje na clínica** reúne consultas, pedidos, conferências e parcela
 ## Organização e tutoriais
 
 Inclui busca global, correção cadastral conferida, lista de espera, materiais com estoque e validade, acompanhamento ilustrativo das mensagens e preparação de relatos. Os 26 tutoriais permanecem disponíveis pela lâmpada e pelas Configurações. As novas funções também usam somente a memória: recarregar apaga as alterações da demonstração.
+
+## V1.2.0
+
+O portal local dos pacientes foi retirado. As solicitações são representadas pelo simulador do Google Forms. Despesas e parcelas oferecem Editar com motivo e histórico; o simulador usa as mesmas regras de edição do servidor. Os tutoriais de Anamnese e Pagamentos/parcelas foram atualizados. Nenhum dado real é enviado ou retido.

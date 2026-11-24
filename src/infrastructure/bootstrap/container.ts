@@ -43,15 +43,7 @@ import {
 } from '../api/repositorios-backend-nucleo.js';
 import { CONFIGURACAO_API } from './configuracao-api.js';
 import {
-  AbrirAnamnesePublica,
-  ConsultarRespostaRecebida,
-  GerarLinkAnamneseRemoto,
-  ImportarAnamneseRecebida,
-  ObterLinkAnamneseRemoto,
-  RevogarLinkAnamneseRemoto,
   RevogarLinkAtivoDoPaciente,
-  SubmeterAnamnesePublica,
-  VerificarServidorAnamnese,
 } from '../../application/use-cases/anamnese-remota.js';
 import { ObterDiagnosticoSincronizacao, VerificarTarefaBackupAgendada } from '../../application/use-cases/sincronizacao.js';
 import {
@@ -165,15 +157,6 @@ import {
 import { ExportarDados, ImportarDados } from '../../application/use-cases/backup.js';
 import { MontarDocumentosDoPaciente } from '../../application/use-cases/documentos-paciente.js';
 import {
-  AbrirAnamnesePorToken,
-  GerarLinkAnamnese,
-  ObterLinkAnamneseDoPaciente,
-  RevogarLinkAnamnese,
-  SubmeterAnamnesePorToken,
-} from '../../application/use-cases/link-anamnese.js';
-import {
-  AbrirAgendamentoWhatsappPublico,
-  ConfirmarAgendamentoWhatsappPublico,
   PrepararMensagemWhatsappLinkAgendamento,
   RevogarLinkAgendamentoAtivoDoPaciente,
 } from '../../../whatsapp-itens/src/application/use-cases/agendamento-whatsapp.js';
@@ -207,7 +190,6 @@ import {
   EditarProcedimentoCatalogo,
   ListarProcedimentosCatalogo,
   ObterProcedimentoCatalogo,
-  SemearCatalogoProcedimentos,
 } from '../../application/use-cases/catalogo-procedimentos.js';
 import {
   AdiarRetorno,
@@ -404,7 +386,7 @@ export function criarContainer(opcoes: OpcoesContainer = {}) {
   // idempotente (nunca duplica, nunca sobrescreve preço já editado). Nunca
   // bloqueia a inicialização do app: falha de rede/servidor aqui não deve
   // impedir o resto do sistema de carregar.
-  // Catálogo exclusivamente fictício da demonstração.
+  // A amostra usa somente os preços fictícios do simulador.
   // Prepara (nunca envia) as mensagens de cortesia do dia a cada boot —
   // idempotente por ano/paciente/campanha (ver `PrepararMensagensCortesiaDoDia`).
   void new PrepararMensagensCortesiaDoDia(pacientesRepo, campanhasComemorativasRepo, mensagensCortesiaRepo, supressaoCortesiaWhatsappApi)
@@ -601,44 +583,14 @@ export function criarContainer(opcoes: OpcoesContainer = {}) {
         registrosWhatsappRepo,
         IDENTIDADE_CLINICA,
       ),
-      abrirAgendamentoPublico: new AbrirAgendamentoWhatsappPublico(gatewayAgendamentoWhatsapp),
-      confirmarAgendamentoPublico: new ConfirmarAgendamentoWhatsappPublico(gatewayAgendamentoWhatsapp),
       revogarLinkAgendamentoAtivoDoPaciente: new RevogarLinkAgendamentoAtivoDoPaciente(gatewayAgendamentoWhatsapp),
       definirConsentimento: new DefinirConsentimentoWhatsapp(pacientesRepo),
       registrarAbertura: new RegistrarAberturaWhatsapp(registrosWhatsappRepo, IDENTIDADE_CLINICA),
       listarHistorico: new ListarHistoricoWhatsappDoPaciente(registrosWhatsappRepo),
     },
-    linkAnamnese: {
-      gerar: new GerarLinkAnamnese(linksAnamneseRepo, pacientesRepo),
-      obterDoPaciente: new ObterLinkAnamneseDoPaciente(linksAnamneseRepo),
-      revogar: new RevogarLinkAnamnese(linksAnamneseRepo),
-      abrirPorToken: new AbrirAnamnesePorToken(linksAnamneseRepo, pacientesRepo),
-      submeterPorToken: new SubmeterAnamnesePorToken(linksAnamneseRepo, anamnesesRepo),
-    },
-    /**
-     * Slice de anamnese COMPARTILHADA (Etapa 18) — só ativo quando
-     * `CONFIGURACAO_API.habilitado` (`VITE_API_ANAMNESE=on`). Fala com o
-     * servidor de `server/`. A tela escolhe entre `linkAnamnese` (local)
-     * e `anamneseRemota` (servidor) por `sincronizacaoAnamnese`.
-     */
+    // Mantido somente para revogar registros históricos ao arquivar um paciente.
     sincronizacaoAnamnese: CONFIGURACAO_API.habilitado,
-    anamneseRemota: {
-      verificarServidor: new VerificarServidorAnamnese(gatewayAnamnese),
-      gerarLink: new GerarLinkAnamneseRemoto(gatewayAnamnese),
-      obterLink: new ObterLinkAnamneseRemoto(gatewayAnamnese),
-      revogarLink: new RevogarLinkAnamneseRemoto(gatewayAnamnese),
-      revogarLinkAtivoDoPaciente: new RevogarLinkAtivoDoPaciente(gatewayAnamnese),
-      abrirPublica: new AbrirAnamnesePublica(gatewayAnamnese),
-      submeterPublica: new SubmeterAnamnesePublica(gatewayAnamnese),
-      consultarRespostaRecebida: new ConsultarRespostaRecebida(gatewayAnamnese),
-      importarRecebida: new ImportarAnamneseRecebida(gatewayAnamnese, anamnesesRepo),
-    },
-    /**
-     * Diagnóstico de sincronização (Etapa 20) — junta as flags de
-     * `CONFIGURACAO_API` com uma sondagem ao vivo do `/health`. É o que
-     * o `SincronizacaoProvider` e a tela de Backup consomem para
-     * mostrar "local / conectado / offline".
-     */
+    anamneseRemota: {revogarLinkAtivoDoPaciente: new RevogarLinkAtivoDoPaciente(gatewayAnamnese)},
     sincronizacao: {
       obterDiagnostico: new ObterDiagnosticoSincronizacao(sondaBackend, {
         baseUrl: CONFIGURACAO_API.baseUrl,

@@ -9,8 +9,6 @@ import {
   CalendarClock,
   CalendarDays,
   ClipboardList,
-  Copy,
-  ExternalLink,
   FileHeart,
   Grid3x3,
   HardDrive,
@@ -36,11 +34,10 @@ import { Button, buttonClassName } from '../components/ui/button.js';
 import { Card } from '../components/ui/card.js';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '../components/ui/dialog.js';
 import { EmptyState } from '../components/ui/empty-state.js';
-import { Input, Textarea } from '../components/ui/input.js';
+import { Textarea } from '../components/ui/input.js';
 import { centavosParaReaisTexto, formatarDataIso } from '../lib/formatadores.js';
 import { useDataDaClinica } from '../lib/use-data-da-clinica.js';
 import { useContainer } from '../providers/container-provider.js';
-import { useSincronizacao } from '../providers/sincronizacao-provider.js';
 import { useEncerramentosConsultas } from '../providers/encerramentos-consultas-provider.js';
 
 function CartaoEstatistica({ titulo, valor, tom }: { titulo: string; valor: string; tom?: 'danger' }) {
@@ -130,7 +127,6 @@ function paraLinha(
 export function HomePage() {
   const container = useContainer();
   const hoje = useDataDaClinica();
-  const { diagnostico } = useSincronizacao();
   const versaoAtendimentos = useEncerramentosConsultas()?.versao ?? 0;
   const [resumo, setResumo] = useState<ResumoDoPainel | null>(null);
   const [pacientesRecentes, setPacientesRecentes] = useState<Paciente[]>([]);
@@ -138,31 +134,12 @@ export function HomePage() {
   const [proximasConsultas, setProximasConsultas] = useState<ConsultaProxima[]>([]);
   const [pendencias, setPendencias] = useState<ResumoPendencias | null>(null);
   const [erroCarregar, setErroCarregar] = useState(false);
-  const [linkCopiado, setLinkCopiado] = useState(false);
 
   // Endereço editável da clínica (Etapa 54) — pode mudar de lugar.
   const [enderecoClinica, setEnderecoClinica] = useState<string | null>(null);
   const [dialogEnderecoAberto, setDialogEnderecoAberto] = useState(false);
   const [rascunhoEndereco, setRascunhoEndereco] = useState('');
   const [salvandoEndereco, setSalvandoEndereco] = useState(false);
-
-  const origemAtual = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3999';
-  const urlAtual = `${origemAtual.replace(/\/$/, '')}/entrar`;
-  let linkUniversal = urlAtual;
-  if (diagnostico?.saude?.enderecoLan) {
-    try {
-      const porta = new URL(origemAtual).port;
-      linkUniversal = `http://${diagnostico.saude.enderecoLan}${porta ? `:${porta}` : ''}/entrar`;
-    } catch {
-      linkUniversal = urlAtual;
-    }
-  }
-
-  async function copiarLinkUniversal(): Promise<void> {
-    await navigator.clipboard.writeText(linkUniversal);
-    setLinkCopiado(true);
-    window.setTimeout(() => setLinkCopiado(false), 2000);
-  }
 
   function abrirEdicaoEndereco(): void {
     setRascunhoEndereco(enderecoClinica ?? '');
@@ -531,44 +508,7 @@ export function HomePage() {
           </ul>
         </Card>
       </div>
-      <details className="rounded-2xl border border-neutral-200 bg-surface p-5">
-        <summary className="cursor-pointer text-sm font-semibold text-neutral-700">Acesso dos pacientes na rede da clínica</summary>
-        <div className="mt-4 flex flex-col gap-3">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h2 className="text-sm font-semibold text-neutral-700">Link de acesso local</h2>
-            <p className="text-sm text-neutral-500">
-              Acesso com CPF, RG ou celular cadastrado, para uso na clínica.
-            </p>
-          </div>
-          <a
-            href={linkUniversal}
-            target="_blank"
-            rel="noreferrer"
-            className={buttonClassName('secondary', 'h-9 gap-2')}
-          >
-            <ExternalLink className="h-4 w-4" aria-hidden="true" /> Abrir
-          </a>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Input readOnly value={linkUniversal} aria-label="Link de acesso local" className="text-xs" />
-          <Button variant="secondary" onClick={() => void copiarLinkUniversal()} className="shrink-0">
-            <Copy className="h-4 w-4" aria-hidden="true" /> {linkCopiado ? 'Copiado' : 'Copiar'}
-          </Button>
-        </div>
-        {diagnostico?.saude?.enderecoLan ? (
-          <Alert tone="warning">
-            Use apenas na <strong>mesma rede da clínica</strong>. Não funciona fora dela e não deve ser divulgado
-            em uma bio pública. Os links do Google Forms enviados pelo WhatsApp são independentes deste acesso.
-          </Alert>
-        ) : (
-          <p className="text-xs text-neutral-500">
-            Este endereço só funciona neste computador — o sistema ainda não encontrou o endereço de rede da
-            clínica para gerar um link que funcione em outro aparelho.
-          </p>
-        )}
-        </div>
-      </details>
+
 
     </div>
   );

@@ -93,7 +93,7 @@ import type {
  * Versão 10 (aniversário/cortesia): adicionou `campanhasComemorativas`
  * e `mensagensCortesia`. OPCIONAIS como as anteriores.
  */
-export const VERSAO_FORMATO_BACKUP = 12;
+export const VERSAO_FORMATO_BACKUP = 13;
 
 /** Etiqueta de máquina que identifica um arquivo como backup DESTE sistema. */
 export const APP_ID_BACKUP = 'projfernanda';
@@ -118,6 +118,7 @@ export interface ResumoDoBackup {
 }
 
 export interface DadosBackup {
+  respostasAnamnese?: {id:string;pacienteId:string;dados:unknown;criadoEm:string;atualizadoEm:string}[];
   operacaoClinica?: {id:string;[chave:string]:unknown}[];
   despesas?: LancamentoFinanceiro[];
   parcelas?: LancamentoFinanceiro[];
@@ -246,6 +247,7 @@ export function analisarBackup(valor: unknown): ResultadoAnaliseBackup {
   // `bloqueiosAgenda` são opcionais: ausentes viram lista vazia (arquivo de
   // uma versão anterior à coleção); presentes, precisam ser array.
   for (const chaveOpcional of [
+    'respostasAnamnese',
     'operacaoClinica',
     'despesas',
     'parcelas',
@@ -263,6 +265,7 @@ export function analisarBackup(valor: unknown): ResultadoAnaliseBackup {
   }
 
   const chavesParaValidarItens = [
+    ...(obj.respostasAnamnese !== undefined ? (['respostasAnamnese'] as const) : []),
     ...chavesDeListas,
     ...(obj.consultas !== undefined ? (['consultas'] as const) : []),
     ...(obj.registrosWhatsapp !== undefined ? (['registrosWhatsapp'] as const) : []),
@@ -287,6 +290,7 @@ export function analisarBackup(valor: unknown): ResultadoAnaliseBackup {
   }
 
   const listas = {
+    respostasAnamnese: (obj.respostasAnamnese as DadosBackup['respostasAnamnese']) ?? [],
     operacaoClinica: (obj.operacaoClinica as DadosBackup['operacaoClinica']) ?? [],
     despesas: (obj.despesas as LancamentoFinanceiro[] | undefined) ?? [],
     parcelas: (obj.parcelas as LancamentoFinanceiro[] | undefined) ?? [],
@@ -439,7 +443,7 @@ export class ImportarDados {
   ) {}
 
   async executar(dados: DadosBackup): Promise<void> {
-    if (dados.despesas?.length || dados.parcelas?.length || dados.operacaoClinica?.length) throw new ErroDominio('Este backup contém dados administrativos do servidor. Conecte o servidor para restaurar sem perder registros.');
+    if (dados.respostasAnamnese?.length || dados.despesas?.length || dados.parcelas?.length || dados.operacaoClinica?.length) throw new ErroDominio('Este backup contém dados administrativos do servidor. Conecte o servidor para restaurar sem perder registros.');
     // "Aceita tudo ou rejeita" (pedido explícito — sem restauração pela
     // metade): reidrata TODAS as coleções em memória antes de gravar
     // qualquer coisa. Se algum item não puder virar entidade — mesmo

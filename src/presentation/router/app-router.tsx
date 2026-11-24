@@ -10,11 +10,8 @@ import { AppShell } from '../layouts/app-shell.js';
 import { AgendaPage } from '../pages/agenda-page.js';
 import { AniversariosPage } from '../pages/aniversarios-page.js';
 import { CatalogoProcedimentosPage } from '../pages/catalogo-procedimentos-page.js';
-import { AgendamentoWhatsappPublicoPage } from '../../../whatsapp-itens/src/presentation/pages/agendamento-whatsapp-publico-page.js';
-import { AnamnesePublicaPage } from '../pages/anamnese-publica-page.js';
 import { ConfiguracoesPage } from '../pages/configuracoes-page.js';
 import { HomePage } from '../pages/home-page.js';
-import { LinkUniversalPage } from '../pages/link-universal-page.js';
 import { DocumentoImpressaoPage } from '../pages/documento-impressao-page.js';
 import { NovoPacientePage } from '../pages/novo-paciente-page.js';
 import { OrcamentoPage } from '../pages/orcamento-page.js';
@@ -35,9 +32,6 @@ import { AbaExames } from '../features/exames/aba-exames.js';
 
 const router = createHashRouter([
   // Página pública do paciente — FORA do AppShell (sem menu, sem outras fichas).
-  { path: 'anamnese/:token', element: <AnamnesePublicaPage /> },
-  { path: 'agendar/:token', element: <AgendamentoWhatsappPublicoPage /> },
-  { path: 'entrar', element: <LinkUniversalPage /> },
   {
     element: <AppShell />,
     children: [

@@ -245,9 +245,9 @@ export function montarMensagemLinkAgendamentoWhatsapp(input: {
 }): string {
   return [
     `${saudacaoPorHorario()}, ${primeiroNome(input.nomeCompletoPaciente)}! Aqui é do ${input.clinica.nomeClinica}.`,
-    'Você pode agendar sua consulta pelo link abaixo:',
+    'Para solicitar uma consulta, preencha o Google Forms abaixo:',
     input.url,
-    'Se for emergência, o próprio formulário mostra o aviso da taxa adicional antes da confirmação.',
+    'Use o mesmo CPF, RG ou celular do cadastro. O envio do formulário não confirma o horário: aguarde a confirmação da clínica. Se for emergência, confira no formulário a taxa adicional ao procedimento.',
   ].join('\n\n');
 }
 

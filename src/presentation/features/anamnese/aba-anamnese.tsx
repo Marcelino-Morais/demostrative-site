@@ -73,6 +73,13 @@ export function AbaAnamnese() {
   /** Bump para recarregar a anamnese salva (ex.: depois de importar as respostas recebidas pelo link). */
   const [chaveRecarregar, setChaveRecarregar] = useState(0);
 
+  const sujoAtualRef = useRef(sujo); sujoAtualRef.current = sujo;
+  useEffect(() => {
+    const atualizar = () => { if(!sujoAtualRef.current&&!document.hidden)setChaveRecarregar(v=>v+1); };
+    const timer=setInterval(atualizar,20000);window.addEventListener('focus',atualizar);
+    return()=>{clearInterval(timer);window.removeEventListener('focus',atualizar);};
+  },[paciente.id]);
+
   // Guardam estado "de trabalho" fora do ciclo de re-render — não precisam disparar re-render sozinhos.
   const valoresSalvosRef = useRef<SalvarAnamneseInput | null>(null);
   const valoresEntreguesAoFormularioRef = useRef<SalvarAnamneseInput | null>(null);
@@ -204,6 +211,7 @@ export function AbaAnamnese() {
     <div className="flex flex-col gap-4">
       <PainelLinkAnamnese
         paciente={paciente}
+        podeAplicar={!sujo}
         aoImportar={async () => {
           // As respostas importadas viram o registro salvo — qualquer rascunho
           // pendente (inclusive um em branco) não deve mais sobrepô-las.

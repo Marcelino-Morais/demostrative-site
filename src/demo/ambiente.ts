@@ -1,3 +1,4 @@
+import {editarLancamentoFinanceiro,parcelasComSaldo,valorDaParcelaEditavel} from '../../server/gestao-financeira-regras.mjs';
 import { colecoes, configuracao, financeiro, iniciarAmostra, solicitacoes, propor, confirmar, falar, avisarMudanca, dia, type Linha } from './estado.js';
 import { PlanoTratamento } from '../domain/entities/plano-tratamento.js';
 import { aplicarOperacao, consultarOperacao, estadoOperacaoVazio, CAMPOS_CORRECAO } from '../../server/operacao-clinica-regras.mjs';
@@ -38,7 +39,7 @@ for(let i=0;i<2;i++){
  metadados.push({id,pacienteId:'demo-paciente-1',nome:`Ilustração de demonstração ${i+1}.png`,tipoMime:'image/png',tamanhoBytes:blob.size,categoria:'RADIOGRAFIA',descricao:'Desenho ilustrativo sem uso clínico.',data:dia(-i),origem:'Amostra fictícia',criadoEm:new Date().toISOString()});bytes.set(id,blob);
 }
 const nome=(id:string)=>colecoes.pacientes?.find(p=>p.id===id)?.nomeCompleto??'Paciente fictício';
-function resumoFinanceiro(){const planos=colecoes['planos']??[];return {...financeiro,planos:planos.map(p=>({id:p.id,pacienteId:p.pacienteId,nome:nome(p.pacienteId),status:p.status,totalCentavos:p.itens.reduce((s:number,i:Linha)=>s+i.valorCentavos*i.quantidade,0),pagoCentavos:p.pagamentos.reduce((s:number,i:Linha)=>s+i.valorCentavos,0)})),recebimentos:planos.flatMap(p=>p.pagamentos.map((r:Linha)=>({...r,planoId:p.id,pacienteId:p.pacienteId,nome:nome(p.pacienteId)})))};}
+function resumoFinanceiro(){const planos=colecoes['planos']??[];return {...financeiro,parcelas:financeiro.parcelas.map((p:Linha)=>({...p,valorEditavel:valorDaParcelaEditavel(p,planos,financeiro.parcelas),saldoCentavos:parcelasComSaldo(financeiro.parcelas,planos).find(q=>q.id===p.id)?.saldoCentavos??0})),planos:planos.map(p=>({id:p.id,pacienteId:p.pacienteId,nome:nome(p.pacienteId),status:p.status,totalCentavos:p.itens.reduce((s:number,i:Linha)=>s+i.valorCentavos*i.quantidade,0),pagoCentavos:p.pagamentos.reduce((s:number,i:Linha)=>s+i.valorCentavos,0)})),recebimentos:planos.flatMap(p=>p.pagamentos.map((r:Linha)=>({...r,planoId:p.id,pacienteId:p.pacienteId,nome:nome(p.pacienteId)})))};}
 // Substitui fetch antes de carregar o aplicativo. Nenhuma API real é chamada.
 window.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
   const req=input instanceof Request?input:null;const url=new URL(req?req.url:String(input),location.href);const caminho=url.pathname;const metodo=init?.method??req?.method??'GET';
@@ -87,9 +88,11 @@ window.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
     }catch(e){return json({erro:{codigo:'horario-indisponivel',mensagem:e instanceof Error?e.message:'Confira os dados.'}},409);}
   }
   if(caminho==='/api/gestao-financeira')return json(resumoFinanceiro());
+  if(recurso==='gestao-financeira'&&['despesas','parcelas'].includes(id)&&partes[4]==='editar'){const dados={despesas:Object.fromEntries(financeiro.despesas.map((d:Linha)=>[d.id,d])),parcelas:Object.fromEntries(financeiro.parcelas.map((p:Linha)=>[p.id,p])),planos:Object.fromEntries((colecoes.planos??[]).map(p=>[p.id,p]))};const r=editarLancamentoFinanceiro(dados,id,acao,corpo,new Date().toISOString());if(r.erro)return json({erro:{codigo:r.erro,mensagem:r.mensagem}},r.status);financeiro.despesas=Object.values(dados.despesas);financeiro.parcelas=Object.values(dados.parcelas);avisarMudanca();return json(r);}
   if(recurso==='gestao-financeira'&&['despesas','parcelas'].includes(id)){const lista=financeiro[id] as Linha[];if(partes[4]==='estornar'){const r=lista.find(r=>r.id===acao);if(r)r.canceladoEm=new Date().toISOString();}else if(metodo==='POST')lista.push({...corpo,id:crypto.randomUUID()});return json({ok:true});}
   if(recurso==='pacientes'&&acao==='buscar-documento')return json({ids:[]});
   if(caminho==='/api/pacientes/buscar-documento'){const termo=String(corpo.termo??'').replace(/\D/g,'');return json({ids:termo.length>=3?(colecoes.pacientes??[]).filter(p=>['cpf','rg'].some(k=>String(p[k]??'').replace(/\D/g,'').includes(termo))).map(p=>p.id):[]});}
+  if(recurso==='pacientes'&&acao==='anamnese-recebida')return json(null);
   if(recurso==='pacientes'&&acao==='perfil-forms')return json({foto:{disponivel:false,status:'SEM_FOTO',erro:null,atualizadaEm:null},revisao:null,importacaoFotosConfigurada:false});
   if(recurso==='pacientes'&&acao==='foto-perfil')return json(null,404);
   if(recurso==='pacientes'&&acao==='documentos-impressao'){const p=colecoes.pacientes?.find(p=>p.id===id);return json({cpf:p?.cpf??null,rg:p?.rg??null});}
