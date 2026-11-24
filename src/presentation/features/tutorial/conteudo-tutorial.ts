@@ -98,6 +98,7 @@ export const MODULOS_TUTORIAL: ModuloTutorial[] = [
  { id:'funcionamento',nome:'Descanso, bloqueios e feriados',etapas:[
   e('Opções da agenda','Abra Mais opções para bloquear dias e consultar feriados. Use o motivo público somente para informações que o paciente pode receber; observações internas não devem ser divulgadas.','/agenda','texto:Mais opções'),
   e('Funcionamento e descanso','Configure aqui abertura, fechamento e intervalo de descanso. Os encaixes respeitam esse intervalo, os bloqueios e a duração do atendimento.','/configuracoes','css:#descanso-diario'),
+  e('Pausa entre atendimentos','Informe quantos minutos deseja reservar depois de cada consulta e salve os horários. Zero desativa. Novos horários respeitam essa pausa, inclusive ao reagendar; consultas já existentes não são movidas.','/configuracoes','css:[data-tour="pausa-pos-consulta"]'),
  ]},
  { id:'anamnese',nome:'Anamnese e alertas',paciente:true,etapas:[
   e('Confira os alertas','Leia os pontos de atenção antes do atendimento. Um aviso resume o relato; confira a anamnese completa. Respostas ausentes não significam ausência de risco.',`${ficha}/anamnese`,'css:[data-tour="alertas-clinicos"]','css:main h1'),

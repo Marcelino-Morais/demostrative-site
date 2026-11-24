@@ -1,6 +1,6 @@
 import type { SalvarAnamneseInput } from '../../domain/entities/anamnese.js';
 import type { ApiClient } from '../ports/api-client.js';
-export const VERSAO_INTERFACE='1.2.0';
+export const VERSAO_INTERFACE='1.3.0';
 export interface Espera {id:string;pacienteId:string;nomePaciente:string;pacienteDisponivel:boolean;preferencia:string;observacao:string;status:'AGUARDANDO'|'CONTATADO'|'RESOLVIDO'|'CANCELADO';versao:number;criadoEm:string}
 export interface Material {id:string;nome:string;unidade:string;lote:string;validade:string|null;minimo:number;quantidade:number;arquivado:boolean}
 export interface MovimentoMaterial {id:string;materialId:string;tipo:'ENTRADA'|'SAIDA';quantidade:number;motivo:string;criadoEm:string}

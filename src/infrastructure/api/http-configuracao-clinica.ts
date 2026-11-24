@@ -36,6 +36,7 @@ export class HttpConfiguracaoClinica implements PortaConfiguracaoClinica {
   private ler(corpo: unknown): ConfiguracaoClinicaEditavel {
     const c = (corpo ?? {}) as Record<string, unknown>;
     return { endereco: typeof c.endereco === 'string' ? c.endereco : '',
+      ...(c.pausaPosConsultaMinutos !== undefined ? {pausaPosConsultaMinutos: c.pausaPosConsultaMinutos as number} : {}),
       ...(c.funcionamento ? { funcionamento: c.funcionamento as ConfiguracaoClinicaEditavel['funcionamento'] } : {}),
       ...(c.descanso ? { descanso: c.descanso as ConfiguracaoClinicaEditavel['descanso'] } : {}) };
   }

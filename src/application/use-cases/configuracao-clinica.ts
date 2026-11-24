@@ -1,4 +1,4 @@
-import { FUNCIONAMENTO_PADRAO, funcionamentoValido, descansoDentroDoFuncionamento } from '../../../server/funcionamento-agenda.mjs';
+import { FUNCIONAMENTO_PADRAO, funcionamentoValido, pausaPosConsultaValida, descansoDentroDoFuncionamento } from '../../../server/funcionamento-agenda.mjs';
 import type {
   ConfiguracaoClinicaEditavel,
   PortaConfiguracaoClinica,
@@ -27,6 +27,7 @@ export class SalvarConfiguracaoClinica {
   async executar(config: ConfiguracaoClinicaEditavel): Promise<ConfiguracaoClinicaEditavel> {
     const atual = await this.porta.obter();
     config = { ...atual, ...config };
+    if (config.pausaPosConsultaMinutos !== undefined && !pausaPosConsultaValida(config.pausaPosConsultaMinutos)) throw new Error('Informe uma pausa após consulta de 0 a 180 minutos inteiros.');
     const endereco = config.endereco.trim().slice(0, TAMANHO_MAXIMO_ENDERECO);
     if (config.descanso && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(config.descanso.inicio)
       || !/^([01]\d|2[0-3]):[0-5]\d$/.test(config.descanso.fim) || config.descanso.inicio >= config.descanso.fim)) {
@@ -34,6 +35,6 @@ export class SalvarConfiguracaoClinica {
     }
     if (config.funcionamento && !funcionamentoValido(config.funcionamento)) throw new Error('Informe abertura e fechamento válidos, com fechamento depois da abertura, no mesmo dia.');
     if (!descansoDentroDoFuncionamento(config.descanso ?? { ativo: true, inicio: '12:00', fim: '13:30' }, config.funcionamento ?? FUNCIONAMENTO_PADRAO)) throw new Error('O descanso ativo precisa ficar dentro do horário de funcionamento. Ajuste o intervalo ou desative-o.');
-    return this.porta.salvar({ endereco, ...(config.funcionamento ? { funcionamento: config.funcionamento } : {}), ...(config.descanso ? { descanso: config.descanso } : {}) });
+    return this.porta.salvar({ endereco, ...(config.pausaPosConsultaMinutos !== undefined ? {pausaPosConsultaMinutos:config.pausaPosConsultaMinutos} : {}), ...(config.funcionamento ? { funcionamento: config.funcionamento } : {}), ...(config.descanso ? { descanso: config.descanso } : {}) });
   }
 }

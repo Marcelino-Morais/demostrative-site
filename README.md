@@ -39,3 +39,7 @@ Inclui busca global, correção cadastral conferida, lista de espera, materiais 
 ## V1.2.0
 
 O portal local dos pacientes foi retirado. As solicitações são representadas pelo simulador do Google Forms. Despesas e parcelas oferecem Editar com motivo e histórico; o simulador usa as mesmas regras de edição do servidor. Os tutoriais de Anamnese e Pagamentos/parcelas foram atualizados. Nenhum dado real é enviado ou retido.
+
+## V1.3.0
+
+Funcionamento e descanso inclui pausa após cada consulta, padrão de 10 minutos. Zero desativa. A amostra usa a regra compartilhada de encaixe para respeitar a pausa antes e depois de outros atendimentos, preservando as reservas existentes. O tutorial da página explica a configuração.

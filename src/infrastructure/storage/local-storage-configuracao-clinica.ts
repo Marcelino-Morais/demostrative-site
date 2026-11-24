@@ -20,6 +20,7 @@ export class LocalStorageConfiguracaoClinicaRepository implements PortaConfigura
       if (!bruto) return { ...VAZIA };
       const lido = JSON.parse(bruto) as Partial<ConfiguracaoClinicaEditavel>;
       return { endereco: typeof lido.endereco === 'string' ? lido.endereco : '',
+        ...(lido.pausaPosConsultaMinutos !== undefined ? {pausaPosConsultaMinutos:lido.pausaPosConsultaMinutos} : {}),
         ...(lido.funcionamento ? { funcionamento: lido.funcionamento } : {}),
         ...(lido.descanso ? { descanso: lido.descanso } : {}) };
     } catch {

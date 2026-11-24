@@ -9,6 +9,8 @@
 export interface ConfiguracaoClinicaEditavel {
   /** Endereço completo, texto livre (rua, número, bairro, cidade...); vazio = não configurado ainda. */
   endereco: string;
+  /** Intervalo mínimo entre atendimentos; 0 desativa. */
+  pausaPosConsultaMinutos?: number;
   funcionamento?: { inicio: string; fim: string };
   descanso?: { ativo: boolean; inicio: string; fim: string };
 }

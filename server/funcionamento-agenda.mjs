@@ -12,3 +12,5 @@ export function consultaForaDoFuncionamento(consulta, configuracao) {
  if (!funcionamentoValido(funcionamento) || !horaValida(consulta.horario) || !Number.isInteger(consulta.duracaoMinutos) || consulta.duracaoMinutos <= 0) return true;
  return minutos(consulta.horario) < minutos(funcionamento.inicio) || minutos(consulta.horario)+consulta.duracaoMinutos > minutos(funcionamento.fim);
 }
+
+export function pausaPosConsultaValida(valor) { return Number.isInteger(valor) && valor >= 0 && valor <= 180; }
