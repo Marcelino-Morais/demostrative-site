@@ -14,7 +14,11 @@ import { centavosParaReaisTexto } from '../../lib/formatadores.js';
 import { useContainer } from '../../providers/container-provider.js';
 
 const seguroCsv = (v: string) => /^[=+\-@\t\r]/u.test(v) ? "'"+v : v;
-export function FechamentoFinanceiro({ pacienteId, chaveAtualizacao }: { pacienteId?: string; chaveAtualizacao?: string }) {
+type PropsFechamentoFinanceiro = { pacienteId?: string; chaveAtualizacao?: string };
+export function FechamentoFinanceiro(props: PropsFechamentoFinanceiro) {
+ return <ConteudoFechamentoFinanceiro key={props.pacienteId??'clinica'} {...props}/>;
+}
+function ConteudoFechamentoFinanceiro({ pacienteId, chaveAtualizacao }: PropsFechamentoFinanceiro) {
  const [edicao,setEdicao]=useState<{tipo:'despesas'|'parcelas';row:LancamentoFinanceiro}|null>(null);
  const container=useContainer();const chaveRegistro=useRef(crypto.randomUUID());const [dados,setDados]=useState<ResumoGestaoFinanceira|null>(null),[erro,setErro]=useState(''),[ocupado,setOcupado]=useState(false),[confirmandoEstorno,setConfirmandoEstorno]=useState('');
  const [mes,setMes]=useState(()=>{const d=new Date(hojeNaClinica()+'T12:00:00');if(d.getDate()<5)d.setMonth(d.getMonth()-1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;});

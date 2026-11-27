@@ -18,7 +18,7 @@ export function PainelLinkAnamnese({ paciente,aoImportar,podeAplicar=true }: { p
     try { await navigator.clipboard.writeText(LINK_FORMS_ANAMNESE); setCopiado(true); setErro(false); }
     catch { setErro(true); }
   }
-  return <><div className="no-print"><RespostaAnamneseRecebida pacienteId={paciente.id} podeAplicar={podeAplicar} aoAplicar={aoImportar}/></div><Card className="no-print flex flex-col gap-3">
+  return <><div className="no-print"><RespostaAnamneseRecebida key={paciente.id} pacienteId={paciente.id} podeAplicar={podeAplicar} aoAplicar={aoImportar}/></div><Card className="no-print flex flex-col gap-3">
     <h2 className="flex items-center gap-2 text-sm font-semibold"><Link2 className="h-4 w-4" aria-hidden="true" />Anamnese pelo paciente</h2>
     <p className="text-sm text-neutral-600">Envie o formulário para o paciente preencher o histórico de saúde. Peça que informe o mesmo CPF, RG ou celular cadastrado na clínica.</p>
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

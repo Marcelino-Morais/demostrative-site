@@ -43,3 +43,7 @@ O portal local dos pacientes foi retirado. As solicitações são representadas 
 ## V1.3.0
 
 Funcionamento e descanso inclui pausa após cada consulta, padrão de 10 minutos. Zero desativa. A amostra usa a regra compartilhada de encaixe para respeitar a pausa antes e depois de outros atendimentos, preservando as reservas existentes. O tutorial da página explica a configuração.
+
+## V1.3.1 — revisão da apresentação
+
+Ao trocar de paciente, a edição financeira e a conferência de anamnese não permanecem abertas para a ficha anterior. A aplicação de resposta também possui proteção de duplo clique. Versão de apresentação atualizada; continuam somente dados fictícios em memória, sem integrações reais.
